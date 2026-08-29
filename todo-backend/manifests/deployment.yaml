@@ -24,6 +24,18 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           envFrom:
             - configMapRef:
                 name: project-configmap

@@ -55,6 +55,13 @@ const server = http.createServer(async (req, res) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.url}`)
 
   try {
+    if (req.url === '/healthz') {
+      await pool.query('SELECT 1')
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ status: 'ok' }))
+      return
+    }
+
     if (req.url === '/todos' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify(await readTodos()))

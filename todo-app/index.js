@@ -9,6 +9,8 @@ const IMAGE_FILE = path.join(process.env.IMAGE_DIR, 'image.jpg')
 const CACHE_MS = Number(process.env.IMAGE_CACHE_MINUTES) * 60 * 1000
 const TODO_MAX_LENGTH = Number(process.env.TODO_MAX_LENGTH)
 
+let isHealthy = true
+
 const isFresh = () => {
   try {
     return Date.now() - fs.statSync(IMAGE_FILE).mtimeMs < CACHE_MS
@@ -50,6 +52,16 @@ const readBody = (req) =>
     req.on('end', () => resolve(data))
   })
 
+const backendIsHealthy = async () => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/healthz`)
+    return response.ok
+  } catch (error) {
+    console.log(`The backend is not healthy: ${error.message}`)
+    return false
+  }
+}
+
 const page = (todos) => `<!DOCTYPE html>
 <html>
   <head><title>Todo app</title></head>
@@ -63,11 +75,40 @@ const page = (todos) => `<!DOCTYPE html>
     <ul>
       ${todos.map((todo) => `<li>${todo}</li>`).join('\n      ')}
     </ul>
+    <form action="/break" method="post">
+      <button type="submit">Break the app</button>
+    </form>
   </body>
 </html>
 `
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    if (!isHealthy || !(await backendIsHealthy())) {
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ status: 'unhealthy' }))
+      return
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ status: 'ok' }))
+    return
+  }
+
+  if (req.url === '/break' && req.method === 'POST') {
+    isHealthy = false
+    console.log('The app was broken by a user')
+    res.writeHead(302, { Location: '/' })
+    res.end()
+    return
+  }
+
+  if (!isHealthy) {
+    res.writeHead(500, { 'Content-Type': 'text/html' })
+    res.end('<h1>Todo app</h1><p>The app is broken, wait for a new pod</p>\n')
+    return
+  }
+
   if (req.url === '/image.jpg') {
     if (!isFresh()) {
       try {
