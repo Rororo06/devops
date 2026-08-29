@@ -23,6 +23,13 @@ spec:
         - name: todo-app
           image: PROJECT/TODO_APP
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
           volumeMounts:
             - name: image-cache
               mountPath: /usr/src/app/files
