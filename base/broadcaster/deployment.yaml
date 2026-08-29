@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: project
   name: broadcaster-dep
 spec:
   replicas: 6
@@ -27,10 +26,3 @@ spec:
           envFrom:
             - configMapRef:
                 name: project-configmap
-          env:
-            - name: WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: broadcaster-secret
-                  key: WEBHOOK_URL
-                  optional: true

@@ -1,21 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: project
-  name: todo-backend-dep
+  name: todo-app-dep
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      app: todo-backend
+      app: todo-app
   template:
     metadata:
       labels:
-        app: todo-backend
+        app: todo-app
     spec:
+      volumes:
+        - name: image-cache
+          persistentVolumeClaim:
+            claimName: image-claim
       containers:
-        - name: todo-backend
-          image: PROJECT/TODO_BACKEND
+        - name: todo-app
+          image: PROJECT/TODO_APP
           imagePullPolicy: IfNotPresent
           resources:
             requests:
@@ -36,8 +41,9 @@ spec:
             httpGet:
               path: /healthz
               port: 3000
+          volumeMounts:
+            - name: image-cache
+              mountPath: /usr/src/app/files
           envFrom:
             - configMapRef:
                 name: project-configmap
-            - secretRef:
-                name: postgres-secret

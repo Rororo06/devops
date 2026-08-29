@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: project-staging
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Rororo06/devops
+    path: overlays/staging
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: project-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: project-production
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Rororo06/devops
+    path: overlays/production
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: project-production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
