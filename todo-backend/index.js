@@ -52,6 +52,8 @@ const parseTodo = (body, contentType) => {
 }
 
 const server = http.createServer(async (req, res) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`)
+
   try {
     if (req.url === '/todos' && req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -64,12 +66,16 @@ const server = http.createServer(async (req, res) => {
       const content = parseTodo(body, req.headers['content-type'])
 
       if (!content || content.length > TODO_MAX_LENGTH) {
+        console.log(
+          `Rejected a todo of length ${content ? content.length : 0}: ${JSON.stringify(content)}`
+        )
         res.writeHead(400, { 'Content-Type': 'text/plain' })
         res.end(`todo must be between 1 and ${TODO_MAX_LENGTH} characters\n`)
         return
       }
 
       await createTodo(content)
+      console.log(`Created a todo: ${JSON.stringify(content)}`)
       res.writeHead(201, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ content }))
       return
