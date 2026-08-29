@@ -19,3 +19,25 @@ spec:
               operator: In
               values:
                 - k3d-k3s-default-agent-0
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: image-pv
+spec:
+  storageClassName: image-pv
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /tmp/kube-images
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k3d-k3s-default-agent-0
