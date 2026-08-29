@@ -5,6 +5,8 @@ metadata:
   name: todo-app-dep
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: todo-app
@@ -19,7 +21,7 @@ spec:
             claimName: image-claim
       containers:
         - name: todo-app
-          image: todo-app:1.5
+          image: PROJECT/TODO_APP
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: image-cache
