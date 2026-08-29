@@ -1,0 +1,14 @@
+{
+  "name": "dummysite-controller",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "ISC",
+  "description": "Creates a copy of a website from a DummySite resource",
+  "dependencies": {
+    "@kubernetes/client-node": "^1.3.0"
+  },
+  "type": "module"
+}

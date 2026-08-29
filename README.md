@@ -192,3 +192,18 @@ https://github.com/Rororo06/devops-config, which is the repository ArgoCD reads.
 The workflows of this repository build the images and commit the new image tags
 to the overlays of the configuration repository with the token
 `CONFIG_REPO_TOKEN`.
+
+## 5.1 DummySite
+
+The custom resource `DummySite` copies the website in the field `website_url`.
+The controller in the directory `dummysite` watches the resources and creates a
+Deployment (an init container downloads the page for the nginx container), a
+Service and an Ingress that are owned by the DummySite, so deleting the
+DummySite removes them as well.
+
+    kubectl apply -f dummysite/manifests/resourcedefinition.yaml
+    kubectl apply -f dummysite/manifests/serviceaccount.yaml
+    kubectl apply -f dummysite/manifests/clusterrole.yaml
+    kubectl apply -f dummysite/manifests/clusterrolebinding.yaml
+    kubectl apply -f dummysite/manifests/deployment.yaml
+    kubectl apply -f dummysite/manifests/dummysite.yaml
