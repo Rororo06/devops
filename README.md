@@ -106,3 +106,21 @@ use ~7-10 Mi and ~1m CPU idle, Postgres ~41 Mi).
 
 `gke-logs-todo-created.png` shows the Cloud Logging entry of the todo-backend
 pod when a new todo is created.
+
+## 4.3 Prometheus query
+
+Prometheus is installed with
+
+```
+helm upgrade --install prom prometheus-community/prometheus \
+  --namespace prometheus --create-namespace
+kubectl port-forward svc/prom-prometheus-server -n prometheus 9090:80
+```
+
+The number of pods created by StatefulSets in the `prometheus` namespace:
+
+```
+count(kube_pod_info{namespace="prometheus", created_by_kind="StatefulSet"})
+```
+
+`prometheus-statefulset-pods.png` shows the result of the query.
