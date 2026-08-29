@@ -47,6 +47,12 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
+    if (req.url === '/') {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('ok\n')
+      return
+    }
+
     if (req.url === '/pings') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ pings: await readCounter() }))
