@@ -42,8 +42,13 @@ jobs:
 
       - run: gcloud --quiet auth configure-docker $REGISTRY
 
-      - name: Form the image names
+      - name: Resolve the namespace and image names
         run: |-
+          if [ "$BRANCH" = "main" ]; then
+            echo "NAMESPACE=project" >> $GITHUB_ENV
+          else
+            echo "NAMESPACE=$BRANCH" >> $GITHUB_ENV
+          fi
           echo "TODO_APP_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
           echo "TODO_BACKEND_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
 
@@ -62,7 +67,9 @@ jobs:
 
       - name: Deploy
         run: |-
-          kubectl config set-context --current --namespace=project
+          kubectl create namespace $NAMESPACE || true
+          kubectl config set-context --current --namespace=$NAMESPACE
+          kustomize edit set namespace $NAMESPACE
           kustomize edit set image PROJECT/TODO_APP=$TODO_APP_TAG
           kustomize edit set image PROJECT/TODO_BACKEND=$TODO_BACKEND_TAG
           kustomize build . | kubectl apply -f -
