@@ -124,3 +124,13 @@ count(kube_pod_info{namespace="prometheus", created_by_kind="StatefulSet"})
 ```
 
 `prometheus-statefulset-pods.png` shows the result of the query.
+
+## 4.4 Canary release for Ping-pong
+
+`ping-pong/manifests/rollout.yaml` replaces the deployment with an Argo Rollout
+that shifts 50% of the traffic to the new version and then runs the analysis
+`ping-pong/manifests/analysistemplate.yaml`. The analysis queries the summed CPU
+usage rate of all containers of the `exercises` namespace from Prometheus every
+minute for five minutes and fails the update if it goes above 0.05 CPU. With a
+threshold set too low the analysis fails and the rollout is reverted to the
+previous version.
