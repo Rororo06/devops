@@ -9,20 +9,24 @@ jobs:
   build-publish-release:
     name: Build, Publish and Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Login to Docker Hub
+      - name: Login to the container registry
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish
         env:
-          REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
+          REGISTRY: ghcr.io/rororo06
         run: |-
           for app in todo-app todo-backend broadcaster; do
             docker build --tag "$REGISTRY/$app:$GITHUB_SHA" $app
@@ -42,7 +46,7 @@ jobs:
       - name: Use the new images
         working-directory: config/overlays/staging
         env:
-          REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
+          REGISTRY: ghcr.io/rororo06
         run: |-
           kustomize edit set image PROJECT/TODO_APP=$REGISTRY/todo-app:$GITHUB_SHA
           kustomize edit set image PROJECT/TODO_BACKEND=$REGISTRY/todo-backend:$GITHUB_SHA
