@@ -1,0 +1,9 @@
+{
+  "name": "todo-backend",
+  "version": "1.0.0",
+  "description": "Stores the todo items",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}

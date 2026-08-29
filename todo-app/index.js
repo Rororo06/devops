@@ -3,14 +3,9 @@ const fs = require('fs')
 const path = require('path')
 
 const PORT = process.env.PORT || 3000
+const BACKEND_URL = process.env.TODO_BACKEND_URL || 'http://todo-backend-svc:2345'
 const IMAGE_FILE = path.join('/usr/src/app/files', 'image.jpg')
 const CACHE_MS = 10 * 60 * 1000
-
-const todos = [
-  'Learn Kubernetes',
-  'Write manifests',
-  'Persist the daily image'
-]
 
 const isFresh = () => {
   try {
@@ -26,14 +21,41 @@ const fetchImage = async () => {
   fs.writeFileSync(IMAGE_FILE, buffer)
 }
 
-const page = `<!DOCTYPE html>
+const fetchTodos = async () => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/todos`)
+    return await response.json()
+  } catch (error) {
+    console.log(`Could not fetch the todos: ${error.message}`)
+    return []
+  }
+}
+
+const createTodo = async (content) => {
+  await fetch(`${BACKEND_URL}/todos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content })
+  })
+}
+
+const readBody = (req) =>
+  new Promise((resolve) => {
+    let data = ''
+    req.on('data', (chunk) => {
+      data += chunk
+    })
+    req.on('end', () => resolve(data))
+  })
+
+const page = (todos) => `<!DOCTYPE html>
 <html>
   <head><title>Todo app</title></head>
   <body>
     <h1>Todo app</h1>
     <img src="/image.jpg" alt="daily image" width="600" />
-    <form onsubmit="return false">
-      <input id="todo" type="text" maxlength="140" placeholder="What needs to be done?" required />
+    <form action="/todos" method="post">
+      <input id="content" name="content" type="text" maxlength="140" placeholder="What needs to be done?" required />
       <button type="submit">Send</button>
     </form>
     <ul>
@@ -63,8 +85,20 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
+  if (req.url === '/todos' && req.method === 'POST') {
+    const content = new URLSearchParams(await readBody(req)).get('content')
+
+    if (content && content.length <= 140) {
+      await createTodo(content)
+    }
+
+    res.writeHead(302, { Location: '/' })
+    res.end()
+    return
+  }
+
   res.writeHead(200, { 'Content-Type': 'text/html' })
-  res.end(page)
+  res.end(page(await fetchTodos()))
 })
 
 server.listen(PORT, () => {
