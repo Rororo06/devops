@@ -9,6 +9,7 @@ resources:
   - manifests/persistentvolumeclaim.yaml
   - manifests/statefulset.yaml
   - manifests/cronjob.yaml
+  - manifests/backup-cronjob.yaml
   - todo-app/manifests/deployment.yaml
   - todo-app/manifests/service.yaml
   - todo-app/manifests/ingress.yaml

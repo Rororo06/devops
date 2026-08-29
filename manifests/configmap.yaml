@@ -13,3 +13,4 @@ data:
   POSTGRES_HOST: postgres-svc
   POSTGRES_PORT: "5432"
   POSTGRES_DATABASE: todos
+  BACKUP_BUCKET: dwk-todo-backups-speedy-atom-500823-f0
