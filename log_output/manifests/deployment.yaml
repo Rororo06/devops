@@ -14,8 +14,7 @@ spec:
     spec:
       volumes:
         - name: shared-log
-          persistentVolumeClaim:
-            claimName: shared-claim
+          emptyDir: {}
       containers:
         - name: log-output-writer
           image: log-output-writer:1.0
@@ -24,11 +23,13 @@ spec:
             - name: shared-log
               mountPath: /usr/src/app/files
         - name: log-output-reader
-          image: log-output-reader:1.1
+          image: log-output-reader:1.2
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "3000"
+            - name: PING_PONG_URL
+              value: http://ping-pong-svc:2346
           volumeMounts:
             - name: shared-log
               mountPath: /usr/src/app/files

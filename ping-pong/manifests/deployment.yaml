@@ -12,17 +12,10 @@ spec:
       labels:
         app: ping-pong
     spec:
-      volumes:
-        - name: shared-log
-          persistentVolumeClaim:
-            claimName: shared-claim
       containers:
         - name: ping-pong
-          image: ping-pong:1.1
+          image: ping-pong:1.2
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "3000"
-          volumeMounts:
-            - name: shared-log
-              mountPath: /usr/src/app/files
