@@ -1,6 +1,7 @@
 const http = require('http')
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT
+const TODO_MAX_LENGTH = Number(process.env.TODO_MAX_LENGTH)
 
 const todos = ['Learn Kubernetes', 'Write manifests']
 
@@ -31,9 +32,9 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req)
     const content = parseTodo(body, req.headers['content-type'])
 
-    if (!content || content.length > 140) {
+    if (!content || content.length > TODO_MAX_LENGTH) {
       res.writeHead(400, { 'Content-Type': 'text/plain' })
-      res.end('todo must be between 1 and 140 characters\n')
+      res.end(`todo must be between 1 and ${TODO_MAX_LENGTH} characters\n`)
       return
     }
 

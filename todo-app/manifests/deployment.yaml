@@ -19,13 +19,11 @@ spec:
             claimName: image-claim
       containers:
         - name: todo-app
-          image: todo-app:1.4
+          image: todo-app:1.5
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: image-cache
               mountPath: /usr/src/app/files
-          env:
-            - name: PORT
-              value: "3000"
-            - name: TODO_BACKEND_URL
-              value: http://todo-backend-svc:2345
+          envFrom:
+            - configMapRef:
+                name: project-configmap

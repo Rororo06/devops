@@ -2,10 +2,12 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 
-const PORT = process.env.PORT || 3000
-const BACKEND_URL = process.env.TODO_BACKEND_URL || 'http://todo-backend-svc:2345'
-const IMAGE_FILE = path.join('/usr/src/app/files', 'image.jpg')
-const CACHE_MS = 10 * 60 * 1000
+const PORT = process.env.PORT
+const BACKEND_URL = process.env.TODO_BACKEND_URL
+const IMAGE_URL = process.env.IMAGE_URL
+const IMAGE_FILE = path.join(process.env.IMAGE_DIR, 'image.jpg')
+const CACHE_MS = Number(process.env.IMAGE_CACHE_MINUTES) * 60 * 1000
+const TODO_MAX_LENGTH = Number(process.env.TODO_MAX_LENGTH)
 
 const isFresh = () => {
   try {
@@ -16,7 +18,7 @@ const isFresh = () => {
 }
 
 const fetchImage = async () => {
-  const response = await fetch('https://picsum.photos/1200')
+  const response = await fetch(IMAGE_URL)
   const buffer = Buffer.from(await response.arrayBuffer())
   fs.writeFileSync(IMAGE_FILE, buffer)
 }
@@ -55,7 +57,7 @@ const page = (todos) => `<!DOCTYPE html>
     <h1>Todo app</h1>
     <img src="/image.jpg" alt="daily image" width="600" />
     <form action="/todos" method="post">
-      <input id="content" name="content" type="text" maxlength="140" placeholder="What needs to be done?" required />
+      <input id="content" name="content" type="text" maxlength="${TODO_MAX_LENGTH}" placeholder="What needs to be done?" required />
       <button type="submit">Send</button>
     </form>
     <ul>
@@ -88,7 +90,7 @@ const server = http.createServer(async (req, res) => {
   if (req.url === '/todos' && req.method === 'POST') {
     const content = new URLSearchParams(await readBody(req)).get('content')
 
-    if (content && content.length <= 140) {
+    if (content && content.length <= TODO_MAX_LENGTH) {
       await createTodo(content)
     }
 

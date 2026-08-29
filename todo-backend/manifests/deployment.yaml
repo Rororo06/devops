@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:1.0
+          image: todo-backend:1.1
           imagePullPolicy: IfNotPresent
-          env:
-            - name: PORT
-              value: "3000"
+          envFrom:
+            - configMapRef:
+                name: project-configmap
