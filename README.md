@@ -148,3 +148,39 @@ secret `broadcaster-secret`, which is applied outside of this repository:
 kubectl -n project create secret generic broadcaster-secret \
   --from-literal=WEBHOOK_URL=<url>
 ```
+
+## 4.7 Log output with GitOps
+
+ArgoCD is installed with
+
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+`argocd/log-output-application.yaml` defines an automatically synchronized
+application from `log_output` of this repository, so committing a change to the
+manifests updates the application in the cluster.
+
+## 4.8 and 4.9 The project with GitOps
+
+The project manifests are split into a common `base` and the overlays
+`overlays/staging` and `overlays/production`, which deploy to the namespaces
+`project-staging` and `project-production`. `argocd/project-application.yaml`
+defines an ArgoCD application for both of them.
+
+The differences of the environments:
+
+- production backs up the database with `overlays/production/backup-cronjob.yaml`
+- production gives the broadcaster the secret `broadcaster-secret`, so the
+  messages are forwarded to the external service. In staging the environment
+  variable is missing and the broadcaster only logs the messages.
+- the environments use their own NATS subjects and queue groups
+
+The images are updated by GitHub Actions. `.github/workflows/staging.yaml` runs
+on every commit to the main branch and `.github/workflows/production.yaml` on
+every tag. Both build the images, push them to the registry and commit the new
+image to the overlay of the environment, from where ArgoCD deploys it.
+
+The secrets `postgres-secret` and `broadcaster-secret` are applied outside of
+ArgoCD.
