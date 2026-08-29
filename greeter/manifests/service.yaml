@@ -3,6 +3,8 @@ kind: Service
 metadata:
   namespace: exercises
   name: greeter-svc
+  labels:
+    istio.io/use-waypoint: waypoint
 spec:
   type: ClusterIP
   selector:
@@ -17,6 +19,8 @@ kind: Service
 metadata:
   namespace: exercises
   name: greeter-svc-1
+  labels:
+    istio.io/use-waypoint: waypoint
 spec:
   type: ClusterIP
   selector:
@@ -32,6 +36,8 @@ kind: Service
 metadata:
   namespace: exercises
   name: greeter-svc-2
+  labels:
+    istio.io/use-waypoint: waypoint
 spec:
   type: ClusterIP
   selector:
