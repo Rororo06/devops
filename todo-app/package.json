@@ -1,0 +1,9 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "description": "Todo app web server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
