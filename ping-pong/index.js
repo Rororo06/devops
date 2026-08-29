@@ -40,16 +40,10 @@ const increment = async () => {
 
 const server = http.createServer(async (req, res) => {
   try {
-    if (req.url === '/pingpong') {
+    if (req.url === '/') {
       const counter = await increment()
       res.writeHead(200, { 'Content-Type': 'text/plain' })
       res.end(`pong ${counter - 1}\n`)
-      return
-    }
-
-    if (req.url === '/') {
-      res.writeHead(200, { 'Content-Type': 'text/plain' })
-      res.end('ok\n')
       return
     }
 
