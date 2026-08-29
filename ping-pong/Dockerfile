@@ -2,9 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY index.js ./
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-ENV PORT=3000
+COPY index.js ./
 
 CMD ["node", "index.js"]
