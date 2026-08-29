@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: project-configmap
-data:
-  NATS_SUBJECT: todos-staging
-  NATS_QUEUE_GROUP: broadcasters-staging

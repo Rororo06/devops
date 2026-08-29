@@ -30,17 +30,18 @@ jobs:
             docker push "$REGISTRY/$app:$TAG"
           done
 
-      # the production overlay is read by ArgoCD from the main branch
-      - name: Checkout main
+      - name: Checkout the configuration repository
         uses: actions/checkout@v6
         with:
-          ref: main
+          repository: Rororo06/devops-config
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+          path: config
 
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
       - name: Use the new images
-        working-directory: overlays/production
+        working-directory: config/overlays/production
         env:
           REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
           TAG: ${{ github.ref_name }}
@@ -49,9 +50,9 @@ jobs:
           kustomize edit set image PROJECT/TODO_BACKEND=$REGISTRY/todo-backend:$TAG
           kustomize edit set image PROJECT/BROADCASTER=$REGISTRY/broadcaster:$TAG
 
-      - name: Commit the new images to GitHub
+      - name: Commit the new images to the configuration repository
         uses: EndBug/add-and-commit@v10
         with:
+          cwd: config
           add: overlays/production/kustomization.yaml
           message: New production version released ${{ github.ref_name }}
-          push: origin HEAD:main

@@ -184,3 +184,11 @@ image to the overlay of the environment, from where ArgoCD deploys it.
 
 The secrets `postgres-secret` and `broadcaster-secret` are applied outside of
 ArgoCD.
+
+## 4.10 A separate configuration repository
+
+The Kubernetes configuration of the project was moved to
+https://github.com/Rororo06/devops-config, which is the repository ArgoCD reads.
+The workflows of this repository build the images and commit the new image tags
+to the overlays of the configuration repository with the token
+`CONFIG_REPO_TOKEN`.

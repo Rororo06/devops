@@ -29,11 +29,18 @@ jobs:
             docker push "$REGISTRY/$app:$GITHUB_SHA"
           done
 
+      - name: Checkout the configuration repository
+        uses: actions/checkout@v6
+        with:
+          repository: Rororo06/devops-config
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+          path: config
+
       - name: Set up Kustomize
         uses: imranismail/setup-kustomize@v3
 
       - name: Use the new images
-        working-directory: overlays/staging
+        working-directory: config/overlays/staging
         env:
           REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |-
@@ -41,8 +48,9 @@ jobs:
           kustomize edit set image PROJECT/TODO_BACKEND=$REGISTRY/todo-backend:$GITHUB_SHA
           kustomize edit set image PROJECT/BROADCASTER=$REGISTRY/broadcaster:$GITHUB_SHA
 
-      - name: Commit the new images to GitHub
+      - name: Commit the new images to the configuration repository
         uses: EndBug/add-and-commit@v10
         with:
+          cwd: config
           add: overlays/staging/kustomization.yaml
           message: New staging version released ${{ github.sha }}
