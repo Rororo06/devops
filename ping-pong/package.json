@@ -1,0 +1,9 @@
+{
+  "name": "ping-pong",
+  "version": "1.0.0",
+  "description": "Responds with pong and a request counter",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
