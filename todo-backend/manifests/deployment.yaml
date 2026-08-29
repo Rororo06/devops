@@ -15,8 +15,10 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:1.1
+          image: todo-backend:1.2
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: project-configmap
+            - secretRef:
+                name: postgres-secret

@@ -10,3 +10,6 @@ data:
   IMAGE_DIR: /usr/src/app/files
   IMAGE_CACHE_MINUTES: "10"
   TODO_MAX_LENGTH: "140"
+  POSTGRES_HOST: postgres-svc
+  POSTGRES_PORT: "5432"
+  POSTGRES_DATABASE: todos

@@ -1,9 +1,39 @@
 const http = require('http')
+const { Pool } = require('pg')
 
 const PORT = process.env.PORT
 const TODO_MAX_LENGTH = Number(process.env.TODO_MAX_LENGTH)
 
-const todos = ['Learn Kubernetes', 'Write manifests']
+const pool = new Pool({
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT),
+  database: process.env.POSTGRES_DATABASE,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD
+})
+
+const initialize = async () => {
+  for (;;) {
+    try {
+      await pool.query(
+        'CREATE TABLE IF NOT EXISTS todos (id serial PRIMARY KEY, content text NOT NULL)'
+      )
+      return
+    } catch (error) {
+      console.log(`Waiting for the database: ${error.message}`)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+  }
+}
+
+const readTodos = async () => {
+  const result = await pool.query('SELECT content FROM todos ORDER BY id')
+  return result.rows.map((row) => row.content)
+}
+
+const createTodo = async (content) => {
+  await pool.query('INSERT INTO todos (content) VALUES ($1)', [content])
+}
 
 const readBody = (req) =>
   new Promise((resolve) => {
@@ -22,25 +52,31 @@ const parseTodo = (body, contentType) => {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.url === '/todos' && req.method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify(todos))
-    return
-  }
-
-  if (req.url === '/todos' && req.method === 'POST') {
-    const body = await readBody(req)
-    const content = parseTodo(body, req.headers['content-type'])
-
-    if (!content || content.length > TODO_MAX_LENGTH) {
-      res.writeHead(400, { 'Content-Type': 'text/plain' })
-      res.end(`todo must be between 1 and ${TODO_MAX_LENGTH} characters\n`)
+  try {
+    if (req.url === '/todos' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(await readTodos()))
       return
     }
 
-    todos.push(content)
-    res.writeHead(201, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({ content }))
+    if (req.url === '/todos' && req.method === 'POST') {
+      const body = await readBody(req)
+      const content = parseTodo(body, req.headers['content-type'])
+
+      if (!content || content.length > TODO_MAX_LENGTH) {
+        res.writeHead(400, { 'Content-Type': 'text/plain' })
+        res.end(`todo must be between 1 and ${TODO_MAX_LENGTH} characters\n`)
+        return
+      }
+
+      await createTodo(content)
+      res.writeHead(201, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ content }))
+      return
+    }
+  } catch (error) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' })
+    res.end(`${error.message}\n`)
     return
   }
 
@@ -48,6 +84,8 @@ const server = http.createServer(async (req, res) => {
   res.end('not found\n')
 })
 
-server.listen(PORT, () => {
-  console.log(`Server started in port ${PORT}`)
+initialize().then(() => {
+  server.listen(PORT, () => {
+    console.log(`Server started in port ${PORT}`)
+  })
 })
