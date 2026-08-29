@@ -1,0 +1,9 @@
+{
+  "name": "greeter",
+  "version": "1.0.0",
+  "description": "Responds to HTTP GET with a greeting",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}

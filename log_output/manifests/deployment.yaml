@@ -46,6 +46,8 @@ spec:
               value: "3000"
             - name: PING_PONG_URL
               value: http://ping-pong-svc:2346
+            - name: GREETER_URL
+              value: http://greeter-svc.exercises.svc.cluster.local:3001
             - name: LOG_DIR
               value: /usr/src/app/files
             - name: INFORMATION_FILE

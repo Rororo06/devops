@@ -4,6 +4,7 @@ const path = require('path')
 
 const PORT = process.env.PORT || 3000
 const PING_PONG_URL = process.env.PING_PONG_URL || 'http://ping-pong-svc:2346'
+const GREETER_URL = process.env.GREETER_URL || 'http://greeter-svc:3001'
 const LOG_FILE = path.join(process.env.LOG_DIR || '/usr/src/app/files', 'log.txt')
 const INFORMATION_FILE = process.env.INFORMATION_FILE || '/usr/src/app/config/information.txt'
 const MESSAGE = process.env.MESSAGE || ''
@@ -20,6 +21,16 @@ const fetchPings = async () => {
   const response = await fetch(`${PING_PONG_URL}/pings`)
   const body = await response.json()
   return body.pings
+}
+
+const readGreeting = async () => {
+  try {
+    const response = await fetch(GREETER_URL)
+    return (await response.text()).trim()
+  } catch (error) {
+    console.log(`Could not read the greeting: ${error.message}`)
+    return 'unavailable'
+  }
 }
 
 const readPings = async () => {
@@ -47,9 +58,11 @@ const server = http.createServer(async (req, res) => {
   }
 
   const pings = await readPings()
+  const greeting = await readGreeting()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end(
-    `file content: ${readFile(INFORMATION_FILE, 'no information available')}\n` +
+    `greeting: ${greeting}\n` +
+      `file content: ${readFile(INFORMATION_FILE, 'no information available')}\n` +
       `env variable: MESSAGE=${MESSAGE}\n` +
       `${readFile(LOG_FILE, 'no log available yet')}.\n` +
       `Ping / Pongs: ${pings}\n`

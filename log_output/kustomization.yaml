@@ -15,4 +15,4 @@ images:
     newTag: "1.1"
   - name: PROJECT/LOG_OUTPUT_READER
     newName: log-output-reader
-    newTag: "1.4"
+    newTag: "1.5"
