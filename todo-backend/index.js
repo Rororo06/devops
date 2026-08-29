@@ -18,6 +18,7 @@ const initialize = async () => {
       await pool.query(
         'CREATE TABLE IF NOT EXISTS todos (id serial PRIMARY KEY, content text NOT NULL)'
       )
+      await pool.query('ALTER TABLE todos ADD COLUMN IF NOT EXISTS done boolean NOT NULL DEFAULT false')
       return
     } catch (error) {
       console.log(`Waiting for the database: ${error.message}`)
@@ -27,12 +28,24 @@ const initialize = async () => {
 }
 
 const readTodos = async () => {
-  const result = await pool.query('SELECT content FROM todos ORDER BY id')
-  return result.rows.map((row) => row.content)
+  const result = await pool.query('SELECT id, content, done FROM todos ORDER BY id')
+  return result.rows
 }
 
 const createTodo = async (content) => {
-  await pool.query('INSERT INTO todos (content) VALUES ($1)', [content])
+  const result = await pool.query(
+    'INSERT INTO todos (content) VALUES ($1) RETURNING id, content, done',
+    [content]
+  )
+  return result.rows[0]
+}
+
+const updateTodo = async (id, done) => {
+  const result = await pool.query(
+    'UPDATE todos SET done = $2 WHERE id = $1 RETURNING id, content, done',
+    [id, done]
+  )
+  return result.rows[0]
 }
 
 const readBody = (req) =>
@@ -49,6 +62,13 @@ const parseTodo = (body, contentType) => {
     return JSON.parse(body).content
   }
   return new URLSearchParams(body).get('content')
+}
+
+const parseDone = (body, contentType) => {
+  if (contentType && contentType.includes('application/json')) {
+    return JSON.parse(body).done === true
+  }
+  return new URLSearchParams(body).get('done') === 'true'
 }
 
 const server = http.createServer(async (req, res) => {
@@ -81,10 +101,29 @@ const server = http.createServer(async (req, res) => {
         return
       }
 
-      await createTodo(content)
+      const todo = await createTodo(content)
       console.log(`Created a todo: ${JSON.stringify(content)}`)
       res.writeHead(201, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ content }))
+      res.end(JSON.stringify(todo))
+      return
+    }
+
+    const todoMatch = req.url.match(/^\/todos\/(\d+)$/)
+
+    if (todoMatch && req.method === 'PUT') {
+      const body = await readBody(req)
+      const done = parseDone(body, req.headers['content-type'])
+      const todo = await updateTodo(Number(todoMatch[1]), done)
+
+      if (!todo) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' })
+        res.end('not found\n')
+        return
+      }
+
+      console.log(`Updated a todo: ${JSON.stringify(todo)}`)
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(todo))
       return
     }
   } catch (error) {

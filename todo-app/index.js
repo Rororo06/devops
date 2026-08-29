@@ -43,6 +43,14 @@ const createTodo = async (content) => {
   })
 }
 
+const updateTodo = async (id, done) => {
+  await fetch(`${BACKEND_URL}/todos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ done })
+  })
+}
+
 const readBody = (req) =>
   new Promise((resolve) => {
     let data = ''
@@ -73,7 +81,17 @@ const page = (todos) => `<!DOCTYPE html>
       <button type="submit">Send</button>
     </form>
     <ul>
-      ${todos.map((todo) => `<li>${todo}</li>`).join('\n      ')}
+      ${todos
+        .map(
+          (todo) => `<li>
+        <form action="/todos/${todo.id}" method="post">
+          <input type="hidden" name="done" value="${todo.done ? 'false' : 'true'}" />
+          <button type="submit">${todo.done ? 'Undo' : 'Done'}</button>
+          <span${todo.done ? ' style="text-decoration: line-through"' : ''}>${todo.content}</span>
+        </form>
+      </li>`
+        )
+        .join('\n      ')}
     </ul>
     <form action="/break" method="post">
       <button type="submit">Break the app</button>
@@ -125,6 +143,17 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(503, { 'Content-Type': 'text/plain' })
       res.end('no image available\n')
     }
+    return
+  }
+
+  const todoMatch = req.url.match(/^\/todos\/(\d+)$/)
+
+  if (todoMatch && req.method === 'POST') {
+    const done = new URLSearchParams(await readBody(req)).get('done') === 'true'
+    await updateTodo(todoMatch[1], done)
+
+    res.writeHead(302, { Location: '/' })
+    res.end()
     return
   }
 
