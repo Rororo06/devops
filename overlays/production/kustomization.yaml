@@ -9,6 +9,7 @@ resources:
   - backup-cronjob.yaml
 
 patches:
+  - path: configmap.yaml
   - path: ingress.yaml
   - path: broadcaster.yaml
 

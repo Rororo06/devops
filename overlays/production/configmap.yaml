@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: project-configmap
+data:
+  NATS_SUBJECT: todos-production
+  NATS_QUEUE_GROUP: broadcasters-production
