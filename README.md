@@ -134,3 +134,17 @@ usage rate of all containers of the `exercises` namespace from Prometheus every
 minute for five minutes and fails the update if it goes above 0.05 CPU. With a
 threshold set too low the analysis fails and the rollout is reverted to the
 previous version.
+
+## 4.6 Broadcaster
+
+The backend publishes a message to the NATS subject `todos` when a todo is
+created or updated. The broadcaster subscribes to the subject in the queue group
+`broadcasters`, so each message is handled by exactly one replica even when the
+deployment is scaled to six. The message is forwarded to a generic external
+service as `{"user": "bot", "message": "..."}`. The target URL is read from the
+secret `broadcaster-secret`, which is applied outside of this repository:
+
+```
+kubectl -n project create secret generic broadcaster-secret \
+  --from-literal=WEBHOOK_URL=<url>
+```

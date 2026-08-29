@@ -1,0 +1,12 @@
+{
+  "name": "broadcaster",
+  "version": "1.0.0",
+  "description": "Sends todo status messages to an external chat service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "nats": "^2.29.3"
+  }
+}

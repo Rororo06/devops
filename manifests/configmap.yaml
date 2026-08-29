@@ -13,4 +13,7 @@ data:
   POSTGRES_HOST: postgres-svc
   POSTGRES_PORT: "5432"
   POSTGRES_DATABASE: todos
+  NATS_URL: nats://my-nats.nats.svc.cluster.local:4222
+  NATS_SUBJECT: todos
+  NATS_QUEUE_GROUP: broadcasters
   BACKUP_BUCKET: dwk-todo-backups-speedy-atom-500823-f0

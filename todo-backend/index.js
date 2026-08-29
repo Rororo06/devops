@@ -1,5 +1,6 @@
 const http = require('http')
 const { Pool } = require('pg')
+const { connect, StringCodec } = require('nats')
 
 const PORT = process.env.PORT
 const TODO_MAX_LENGTH = Number(process.env.TODO_MAX_LENGTH)
@@ -11,6 +12,32 @@ const pool = new Pool({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD
 })
+
+const NATS_URL = process.env.NATS_URL
+const NATS_SUBJECT = process.env.NATS_SUBJECT
+const codec = StringCodec()
+let nats = null
+
+const connectToNats = async () => {
+  try {
+    nats = await connect({ servers: NATS_URL })
+    console.log(`Connected to NATS in ${NATS_URL}`)
+  } catch (error) {
+    console.log(`Could not connect to NATS: ${error.message}`)
+  }
+}
+
+const publish = (action, todo) => {
+  if (!nats) {
+    return
+  }
+
+  try {
+    nats.publish(NATS_SUBJECT, codec.encode(JSON.stringify({ action, todo })))
+  } catch (error) {
+    console.log(`Could not publish a message: ${error.message}`)
+  }
+}
 
 const initialize = async () => {
   for (;;) {
@@ -103,6 +130,7 @@ const server = http.createServer(async (req, res) => {
 
       const todo = await createTodo(content)
       console.log(`Created a todo: ${JSON.stringify(content)}`)
+      publish('created', todo)
       res.writeHead(201, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify(todo))
       return
@@ -122,6 +150,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       console.log(`Updated a todo: ${JSON.stringify(todo)}`)
+      publish('updated', todo)
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify(todo))
       return
@@ -136,7 +165,9 @@ const server = http.createServer(async (req, res) => {
   res.end('not found\n')
 })
 
-initialize().then(() => {
+initialize().then(async () => {
+  await connectToNats()
+
   server.listen(PORT, () => {
     console.log(`Server started in port ${PORT}`)
   })
