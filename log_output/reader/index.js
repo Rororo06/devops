@@ -4,13 +4,15 @@ const path = require('path')
 
 const PORT = process.env.PORT || 3000
 const PING_PONG_URL = process.env.PING_PONG_URL || 'http://ping-pong-svc:2346'
-const LOG_FILE = path.join('/usr/src/app/files', 'log.txt')
+const LOG_FILE = path.join(process.env.LOG_DIR || '/usr/src/app/files', 'log.txt')
+const INFORMATION_FILE = process.env.INFORMATION_FILE || '/usr/src/app/config/information.txt'
+const MESSAGE = process.env.MESSAGE || ''
 
-const readLog = () => {
+const readFile = (file, fallback) => {
   try {
-    return fs.readFileSync(LOG_FILE, 'utf8').trim()
+    return fs.readFileSync(file, 'utf8').trim()
   } catch {
-    return 'no log available yet'
+    return fallback
   }
 }
 
@@ -28,7 +30,12 @@ const readPings = async () => {
 const server = http.createServer(async (req, res) => {
   const pings = await readPings()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end(`${readLog()}.\nPing / Pongs: ${pings}\n`)
+  res.end(
+    `file content: ${readFile(INFORMATION_FILE, 'no information available')}\n` +
+      `env variable: MESSAGE=${MESSAGE}\n` +
+      `${readFile(LOG_FILE, 'no log available yet')}.\n` +
+      `Ping / Pongs: ${pings}\n`
+  )
 })
 
 server.listen(PORT, () => {
