@@ -32,6 +32,10 @@ const page = `<!DOCTYPE html>
   <body>
     <h1>Todo app</h1>
     <img src="/image.jpg" alt="daily image" width="600" />
+    <form onsubmit="return false">
+      <input id="todo" type="text" maxlength="140" placeholder="What needs to be done?" required />
+      <button type="submit">Send</button>
+    </form>
     <ul>
       ${todos.map((todo) => `<li>${todo}</li>`).join('\n      ')}
     </ul>
