@@ -16,11 +16,15 @@ const readFile = (file, fallback) => {
   }
 }
 
+const fetchPings = async () => {
+  const response = await fetch(`${PING_PONG_URL}/pings`)
+  const body = await response.json()
+  return body.pings
+}
+
 const readPings = async () => {
   try {
-    const response = await fetch(`${PING_PONG_URL}/pings`)
-    const body = await response.json()
-    return body.pings
+    return await fetchPings()
   } catch (error) {
     console.log(`Could not read the pong count: ${error.message}`)
     return 'unavailable'
@@ -28,6 +32,20 @@ const readPings = async () => {
 }
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    try {
+      await fetchPings()
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ status: 'no data from ping-pong', error: error.message }))
+      return
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ status: 'ok' }))
+    return
+  }
+
   const pings = await readPings()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end(

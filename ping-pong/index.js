@@ -47,6 +47,13 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
+    if (req.url === '/healthz') {
+      await pool.query('SELECT 1')
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ status: 'ok' }))
+      return
+    }
+
     if (req.url === '/pings') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ pings: await readCounter() }))
@@ -62,8 +69,8 @@ const server = http.createServer(async (req, res) => {
   res.end('not found\n')
 })
 
-initialize().then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server started in port ${PORT}`)
-  })
+server.listen(PORT, () => {
+  console.log(`Server started in port ${PORT}`)
 })
+
+initialize()

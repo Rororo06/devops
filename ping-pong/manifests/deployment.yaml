@@ -15,8 +15,14 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ping-pong:1.4
+          image: ping-pong:1.5
           imagePullPolicy: IfNotPresent
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           envFrom:
             - configMapRef:
                 name: ping-pong-configmap
