@@ -1,0 +1,9 @@
+{
+  "name": "log-output-writer",
+  "version": "1.0.0",
+  "description": "Writes a random string with a timestamp to a shared file every 5 seconds",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
