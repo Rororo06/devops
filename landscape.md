@@ -2,8 +2,8 @@
 
 Annotated image: `landscape-annotated.png`
 
-- **Green circles** — projects/products I have used directly (I knew I was using them).
-- **Orange circles** — projects/products that something I used depends on, and which are
+- **Green circles** - projects/products I have used directly (I knew I was using them).
+- **Orange circles** - projects/products that something I used depends on, and which are
   not already circled green.
 
 ## Used directly
@@ -16,12 +16,12 @@ Annotated image: `landscape-annotated.png`
 | Prometheus | Chapter 4 metrics, the StatefulSet pod query, and the Argo Rollouts CPU AnalysisTemplate. |
 | Grafana | Viewing metrics/dashboards together with Prometheus and Loki. |
 | Grafana Loki | Log queries in chapter 4. |
-| Argo CD | GitOps deployments of log output and the project (exercises 4.7–4.10). |
+| Argo CD | GitOps deployments of log output and the project (exercises 4.7-4.10). |
 | Argo Rollouts | Canary release of ping-pong with automated analysis (exercise 4.4). |
 | NATS | The broadcaster service in exercise 4.6. |
-| Istio | Ambient mesh, Bookinfo sample, greeter traffic split (exercises 5.2–5.3). |
+| Istio | Ambient mesh, Bookinfo sample, greeter traffic split (exercises 5.2-5.3). |
 | Envoy | Istio waypoint/ingress gateways and Envoy Gateway used for the Gateway API. |
-| Knative | Serving on a Traefik-less k3d cluster and ping-pong as a Knative Service (5.6–5.7). |
+| Knative | Serving on a Traefik-less k3d cluster and ping-pong as a Knative Service (5.6-5.7). |
 | Kourier | Knative networking layer. |
 | PostgreSQL | Ping-pong and todo-backend databases (StatefulSet and Cloud SQL). |
 | Docker | Building and running every image in the course. |
@@ -30,7 +30,7 @@ Annotated image: `landscape-annotated.png`
 | GitHub Actions | CI/CD pipelines building images and updating the config repository. |
 | GitHub Container Registry / Docker Hub | Image registries for the CI pipelines. |
 | Google Kubernetes Engine | Chapter 3 exercises. |
-| Traefik | Default k3s ingress controller used for the ingress exercises in chapter 1–2. |
+| Traefik | Default k3s ingress controller used for the ingress exercises in chapter 1-2. |
 | Git / GitHub | The application repository and the separate configuration repository. |
 
 ## Used indirectly (dependencies of the above)

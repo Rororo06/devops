@@ -34,7 +34,7 @@ self-hosted PostgreSQL StatefulSet + PersistentVolumeClaim used in this repo.
   autogrowth are Google's responsibility. Maintenance windows are configurable.
   High availability is a checkbox (regional instance), read replicas and
   vertical scaling are one command and mostly online.
-- **Self-hosted**: we own everything — Postgres upgrades (which for a
+- **Self-hosted**: we own everything - Postgres upgrades (which for a
   StatefulSet means a careful, potentially breaking data-directory migration),
   monitoring, disk resizing, and any HA setup (replication, failover
   controller, or an operator such as CloudNativePG). Node upgrades and cluster
@@ -47,12 +47,12 @@ self-hosted PostgreSQL StatefulSet + PersistentVolumeClaim used in this repo.
   archiving are built in and enabled with a flag. Restore is a single command
   or console click, and restoring to a specific timestamp is possible.
   Backups are retained and managed by the platform, off the cluster.
-- **Self-hosted**: we implemented it ourselves — `manifests/backup-cronjob.yaml`
+- **Self-hosted**: we implemented it ourselves - `manifests/backup-cronjob.yaml`
   runs `pg_dump` every 24 h and uploads the dump to Google Cloud Storage using
   Workload Identity. This gives a daily snapshot only: everything written since
   the last dump is lost on a restore, and there is no PITR unless we also build
   WAL shipping. Restoring means creating the database and piping the dump back
-  in with `psql` — simple, but manual and untested unless we test it ourselves.
+  in with `psql` - simple, but manual and untested unless we test it ourselves.
 
 ### Pros / cons summary
 
@@ -70,7 +70,7 @@ backup story we built is weaker (daily dumps, no PITR, restore path is manual);
 HA requires significant extra work.
 
 **Choice for this project**: the self-hosted StatefulSet is the right trade-off
-for a course project — the data is not critical, cost matters, and the daily
+for a course project - the data is not critical, cost matters, and the daily
 `pg_dump` to Cloud Storage is enough. For production data I would take Cloud SQL,
 because managed PITR and failover are far cheaper to buy than to build.
 
