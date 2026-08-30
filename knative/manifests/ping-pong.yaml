@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  namespace: exercises
+  name: ping-pong
+spec:
+  template:
+    spec:
+      containers:
+        - image: PROJECT/PING_PONG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: ping-pong-configmap
+            - secretRef:
+                name: postgres-secret

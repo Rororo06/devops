@@ -75,3 +75,51 @@ hello-00001-deployment-85c5fdb9b5-qhqnf   2/2     Running   0          1s
 $ for i in $(seq 40); do curl -s -H "Host: hello.default.172.19.0.2.sslip.io" http://localhost:8083; done | sort | uniq -c
 World=20 Knative=20
 ```
+
+## Ping-pong as a Knative Service (exercise 5.7)
+
+`manifests/ping-pong.yaml` replaces the ping-pong Deployment/Rollout with a
+Knative Service. The whole setup (Postgres, ping-pong ksvc, log output) is
+deployed with the kustomization in this directory. Because it pulls manifests
+from sibling directories, kustomize needs a relaxed load restrictor:
+
+```bash
+kubectl kustomize --load-restrictor=LoadRestrictionsNone knative | kubectl apply -f -
+```
+
+Log output calls ping-pong through the fully qualified DNS name
+`http://ping-pong.exercises.svc.cluster.local` (patched in
+`patches/log-output-ping-pong-url.yaml`); Knative creates that name as an
+ExternalName service pointing to the Kourier internal gateway, which routes by
+the Host header.
+
+The local image is tagged `dev.local/ping-pong` so that Knative skips digest
+resolution against Docker Hub (`dev.local` is in
+`registries-skipping-tag-resolving`).
+
+```text
+$ kubectl -n exercises get ksvc,po
+NAME                                    URL                                              READY
+service.serving.knative.dev/ping-pong   http://ping-pong.exercises.172.19.0.2.sslip.io   True
+
+NAME                                              READY   STATUS    RESTARTS   AGE
+pod/log-output-dep-698bdcb67f-xnxh9               2/2     Running   0          2m56s
+pod/ping-pong-00002-deployment-68bd5fb565-h2xxw   2/2     Running   0          61s
+pod/postgres-stset-0                              1/1     Running   0          2m56s
+
+$ for i in 1 2 3; do curl -s -H "Host: ping-pong.exercises.172.19.0.2.sslip.io" http://localhost:8083/; done
+pong 0
+pong 1
+pong 2
+
+$ kubectl -n exercises exec deploy/log-output-dep -c log-output-reader -- wget -qO- http://localhost:3000
+greeting: unavailable
+file content: this text is from file
+env variable: MESSAGE=hello gitops
+2026-08-29T23:58:07.397Z: 954bb408-c148-42ac-a9f2-c457e0f156a5.
+Ping / Pongs: 3
+```
+
+(The greeter is part of the Istio mesh on the other cluster, so it reports
+`unavailable` here. Ping-pong does not scale to zero while log output keeps
+polling it every five seconds.)
